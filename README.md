@@ -5,9 +5,13 @@ Home: https://github.com/tdegeus/QPot
 
 Package license: MIT
 
-Feedstock license: BSD-3-Clause
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/qpot-feedstock/blob/master/LICENSE.txt)
 
 Summary: Library to keep track of a sequential potential energy landscape.
+
+Development: https://github.com/tdegeus/QPot
+
+Documentation: https://github.com/tdegeus/QPot
 
 Library to keep track of a sequential potential energy landscape.
 
