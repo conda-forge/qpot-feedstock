@@ -1,6 +1,6 @@
 {% set name = "qpot" %}
-{% set version = "0.4.0" %}
-{% set sha256 = "4e3ed0ad39b84d6920a8ef8cf086d34362642d2327c0a980ee0494675bc19051" %}
+{% set version = "0.5.0" %}
+{% set sha256 = "eb38148f661f93639ce05a5d1c60aad9878bf8443b8d38d097bb80aa93e0595f" %}
 
 package:
   name: {{ name|lower }}
@@ -18,6 +18,8 @@ requirements:
     - {{ compiler('cxx') }}
     - cmake
     - make  # [unix]
+  host:
+    - setuptools_scm
     - xtensor
   run:
     - xtensor
