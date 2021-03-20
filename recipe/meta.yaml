@@ -1,6 +1,6 @@
 {% set name = "qpot" %}
-{% set version = "0.5.0" %}
-{% set sha256 = "eb38148f661f93639ce05a5d1c60aad9878bf8443b8d38d097bb80aa93e0595f" %}
+{% set version = "0.6.0" %}
+{% set sha256 = "3f9baafc59ded2c47ca12fa728928b91aaebbd21b8120329ff93e8cf85b6aed1" %}
 
 package:
   name: {{ name|lower }}
