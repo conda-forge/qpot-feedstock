@@ -11,7 +11,7 @@ Summary: Library to keep track of a sequential potential energy landscape.
 
 Development: https://github.com/tdegeus/QPot
 
-Documentation: https://github.com/tdegeus/QPot
+Documentation: https://tdegeus.github.io/QPot
 
 Library to keep track of a sequential potential energy landscape.
 
