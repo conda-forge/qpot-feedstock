@@ -1,6 +1,6 @@
 {% set org = "tdegeus" %}
 {% set name = "QPot" %}
-{% set version = "0.7.0" %}
+{% set version = "0.6.1" %}
 
 package:
   name: {{ name|lower }}
