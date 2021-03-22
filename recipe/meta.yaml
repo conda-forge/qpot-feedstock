@@ -11,7 +11,7 @@ source:
   sha256: "af4c2993ea250f99c5ef55c7bc5367b762e1aa883673b2fb894a1e3a1e665d9f"
 
 build:
-  number: 0
+  number: 1
 
 requirements:
   build:
@@ -28,9 +28,9 @@ test:
   commands:
     - test -d ${PREFIX}/include/{{ name }}  # [unix]
     - test -f ${PREFIX}/include/{{ name }}/Static.hpp  # [unix]
-    - test -f ${PREFIX}/lib/cmake/{{ name }}/QPotConfig.cmake  # [unix]
+    - test -f ${PREFIX}/lib/cmake/{{ name }}/{{ name }}Config.cmake  # [unix]
     - if exist %LIBRARY_PREFIX%\include\{{ name }}\Static.hpp (exit 0) else (exit 1)  # [win]
-    - if exist %LIBRARY_PREFIX%\lib\cmake\{ name }}Config.cmake (exit 0) else (exit 1)  # [win]
+    - if exist %LIBRARY_PREFIX%\lib\cmake\{{ name }}Config.cmake (exit 0) else (exit 1)  # [win]
 
 about:
   home: https://github.com/{{ org }}/{{ name }}
