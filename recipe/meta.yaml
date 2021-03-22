@@ -1,14 +1,14 @@
-{% set name = "qpot" %}
-{% set version = "0.6.0" %}
-{% set sha256 = "3f9baafc59ded2c47ca12fa728928b91aaebbd21b8120329ff93e8cf85b6aed1" %}
+{% set org = "tdegeus" %}
+{% set name = "QPot" %}
+{% set version = "0.7.0" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://github.com/tdegeus/QPot/archive/v{{ version }}.tar.gz
-  sha256: {{ sha256 }}
+  url: https://github.com/{{ org }}/{{ name }}/archive/v{{ version }}.tar.gz
+  sha256: "c77b7979c567963f3b48be225dae80c1c09a3195c987b26b4a1e4da175bf2bdf"
 
 build:
   number: 0
@@ -26,21 +26,21 @@ requirements:
 
 test:
   commands:
-    - test -d ${PREFIX}/include/QPot  # [unix]
-    - test -f ${PREFIX}/include/QPot/Static.hpp  # [unix]
-    - test -f ${PREFIX}/lib/cmake/QPot/QPotConfig.cmake  # [unix]
-    - if exist %LIBRARY_PREFIX%\include\QPot\Static.hpp (exit 0) else (exit 1)  # [win]
-    - if exist %LIBRARY_PREFIX%\lib\cmake\QPotConfig.cmake (exit 0) else (exit 1)  # [win]
+    - test -d ${PREFIX}/include/{{ name }}  # [unix]
+    - test -f ${PREFIX}/include/{{ name }}/Static.hpp  # [unix]
+    - test -f ${PREFIX}/lib/cmake/{{ name }}/QPotConfig.cmake  # [unix]
+    - if exist %LIBRARY_PREFIX%\include\{{ name }}\Static.hpp (exit 0) else (exit 1)  # [win]
+    - if exist %LIBRARY_PREFIX%\lib\cmake\{ name }}Config.cmake (exit 0) else (exit 1)  # [win]
 
 about:
-  home: https://github.com/tdegeus/QPot
+  home: https://github.com/{{ org }}/{{ name }}
   license: MIT
   license_family: MIT
   license_file: LICENSE
   summary: Library to keep track of a sequential potential energy landscape.
   description: Library to keep track of a sequential potential energy landscape.
-  doc_url: https://github.com/tdegeus/QPot
-  dev_url: https://github.com/tdegeus/QPot
+  doc_url: https://{{ org }}.github.io/{{ name }}
+  dev_url: https://github.com/{{ org }}/{{ name }}
 
 extra:
   recipe-maintainers:
