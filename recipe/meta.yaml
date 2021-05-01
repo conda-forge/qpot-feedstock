@@ -48,11 +48,12 @@ outputs:
     requirements:
       build:
         - {{ compiler('cxx') }}
+        - cmake
+        - ninja
       host:
         - python
-        - setuptools
-        - setuptools_scm
         - pip
+        - setuptools_scm
         - pyxtensor
       run:
         - python
