@@ -59,6 +59,7 @@ outputs:
         - pip
         - pybind11
         - python
+        - scikit-build
         - setuptools_scm
         - xtensor
         - xtensor-python
