@@ -1,1 +1,3 @@
-for /f "usebackq tokens=*" %%a in (`python -c "import os; print(' '.join([arg for arg in list(filter(None, os.environ['CMAKE_ARGS'].split(' '))) if len(arg.split('DCMAKE_INSTALL_PREFIX')) == 1]))"`) do %PYTHON% setup.py install --build-type Release %%a
+:: %PYTHON% setup.py install --build-type Release %CMAKE_ARGS%
+:: with scikit-build incompatible arguments stripped from it
+for /f "usebackq tokens=*" %%a in (`python scikit-build_cmake_args.py`) do %PYTHON% setup.py install --build-type Release %%a
