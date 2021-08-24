@@ -266,10 +266,10 @@ index c0dcf80..4722291 100644
      xt::import_numpy();
  
 diff --git a/setup.py b/setup.py
-index a46f388..97ca25c 100644
+index a46f388..33085d5 100644
 --- a/setup.py
 +++ b/setup.py
-@@ -3,118 +3,15 @@ import re
+@@ -3,118 +3,17 @@ import re
  import sys
  import subprocess
  
@@ -390,11 +390,13 @@ index a46f388..97ca25c 100644
 +if "CMAKE_ARGS" in os.environ:
 +    o = list(filter(None, os.environ["CMAKE_ARGS"].split(" ")))
 +    if len(o) > 0:
++        print("CMAKE_ARGS = ")
++        print("\n".join(o))
 +        cmake_args += o
  
  setup(
      name = 'QPot',
-@@ -125,8 +22,9 @@ setup(
+@@ -125,8 +24,9 @@ setup(
      author = 'Tom de Geus',
      author_email = 'tom@geus.me',
      url = 'https://github.com/tdegeus/QPot',
