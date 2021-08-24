@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 63d992d..9d5941b 100644
+index 63d992d..9d96280 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,10 +1,12 @@
@@ -45,7 +45,7 @@ index 63d992d..9d5941b 100644
  # Set target
  # ==========
  
-@@ -45,100 +56,143 @@ target_link_libraries(${PROJECT_NAME} INTERFACE xtensor)
+@@ -45,100 +56,138 @@ target_link_libraries(${PROJECT_NAME} INTERFACE xtensor)
  target_compile_definitions(${PROJECT_NAME} INTERFACE
      ${PROJECT_NAME_UPPER}_VERSION="${PROJECT_VERSION}")
  
@@ -213,11 +213,6 @@ index 63d992d..9d5941b 100644
      endif()
 +
 +    if (SKBUILD)
-+        if(APPLE)
-+            set_target_properties(${PYPROJECT_NAME} PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
-+        else()
-+            set_target_properties(${PYPROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
-+        endif()
 +        install(TARGETS ${PYPROJECT_NAME} DESTINATION .)
 +    endif()
 +
@@ -232,7 +227,7 @@ index 63d992d..9d5941b 100644
      find_package(Doxygen REQUIRED)
  
      set(DOXYGEN_EXCLUDE_SYMBOLS detail)
-@@ -161,4 +215,5 @@ if(BUILD_DOCS OR BUILD_ALL)
+@@ -161,4 +210,5 @@ if(BUILD_DOCS OR BUILD_ALL)
      set(DOXYGEN_STRIP_FROM_INC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
      set(DOXYGEN_STRIP_FROM_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
      doxygen_add_docs(docs "${CMAKE_CURRENT_SOURCE_DIR}/include" "README.md")
