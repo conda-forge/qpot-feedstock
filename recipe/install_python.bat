@@ -1,1 +1,1 @@
-python -m pip install . -vv
+%PYTHON% setup.py install --build-type Release `python -c "import os; print(' '.join([arg for arg in list(filter(None, os.environ['CMAKE_ARGS'].split(' '))) if len(arg.split('DCMAKE_INSTALL_PREFIX')) == 1]))"`

@@ -1,0 +1,494 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 63d992d..9d5941b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,10 +1,12 @@
+ cmake_minimum_required(VERSION 3.18..3.21)
+ 
+-# Basic settings
+-# ==============
+-
+ project(QPot)
+ 
++string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
++
++# Command-line options
++# ====================
++
+ option(BUILD_ALL "${PROJECT_NAME}: Build tests, Python API & docs" OFF)
+ option(BUILD_TESTS "${PROJECT_NAME}: Build tests" OFF)
+ option(BUILD_EXAMPLES "${PROJECT_NAME}: Build examples" OFF)
+@@ -14,6 +16,17 @@ option(USE_ASSERT "${PROJECT_NAME}: Build with assertions" ON)
+ option(USE_DEBUG "${PROJECT_NAME}: Build in debug mode" OFF)
+ option(USE_SIMD "${PROJECT_NAME}: Build with hardware optimization" OFF)
+ 
++if(SKBUILD)
++    set(BUILD_ALL 0)
++    set(BUILD_TESTS 0)
++    set(BUILD_EXAMPLES 0)
++    set(BUILD_PYTHON 1)
++    set(BUILD_DOCS 0)
++endif()
++
++# Read version
++# ============
++
+ if (DEFINED ENV{SETUPTOOLS_SCM_PRETEND_VERSION})
+     set(PROJECT_VERSION $ENV{SETUPTOOLS_SCM_PRETEND_VERSION})
+     message(STATUS "Building ${PROJECT_NAME} ${PROJECT_VERSION} (read from SETUPTOOLS_SCM_PRETEND_VERSION)")
+@@ -27,8 +40,6 @@ else()
+     message(STATUS "Building ${PROJECT_NAME} ${PROJECT_VERSION}")
+ endif()
+ 
+-string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPER)
+-
+ # Set target
+ # ==========
+ 
+@@ -45,100 +56,143 @@ target_link_libraries(${PROJECT_NAME} INTERFACE xtensor)
+ target_compile_definitions(${PROJECT_NAME} INTERFACE
+     ${PROJECT_NAME_UPPER}_VERSION="${PROJECT_VERSION}")
+ 
+-# Installation
+-# ============
++# Libraries
++# =========
+ 
+ include(CMakePackageConfigHelpers)
+ include(GNUInstallDirs)
++include(CTest)
++include("${PROJECT_NAME}Config.cmake")
+ 
+-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION include)
++# Installation headers / CMake / pkg-config
++# =========================================
+ 
+-configure_file("include/${PROJECT_NAME}/version.hpp"
+-               "${CMAKE_CURRENT_BINARY_DIR}/version.hpp"
+-                @ONLY)
++if(NOT SKBUILD)
+ 
+-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/version.hpp"
+-        DESTINATION "include/${PROJECT_NAME}/")
++    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION include)
+ 
+-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
++    configure_file("include/${PROJECT_NAME}/version.hpp"
++                   "${CMAKE_CURRENT_BINARY_DIR}/version.hpp"
++                    @ONLY)
+ 
+-install(
+-    EXPORT ${PROJECT_NAME}-targets
+-    FILE "${PROJECT_NAME}Targets.cmake"
+-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
++    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/version.hpp"
++            DESTINATION "include/${PROJECT_NAME}/")
+ 
+-set(${PROJECT_NAME}_TMP ${CMAKE_SIZEOF_VOID_P})
+-unset(CMAKE_SIZEOF_VOID_P)
++    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
+ 
+-write_basic_package_version_file(
+-    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+-    VERSION "${PROJECT_VERSION}"
+-    COMPATIBILITY AnyNewerVersion)
++    install(
++        EXPORT ${PROJECT_NAME}-targets
++        FILE "${PROJECT_NAME}Targets.cmake"
++        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+ 
+-set(CMAKE_SIZEOF_VOID_P ${${PROJECT_NAME}_TMP})
++    set(${PROJECT_NAME}_TMP ${CMAKE_SIZEOF_VOID_P})
++    unset(CMAKE_SIZEOF_VOID_P)
+ 
+-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake"
+-              "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
++    write_basic_package_version_file(
++        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
++        VERSION "${PROJECT_VERSION}"
++        COMPATIBILITY AnyNewerVersion)
+ 
+-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.in"
+-               "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" @ONLY)
++    set(CMAKE_SIZEOF_VOID_P ${${PROJECT_NAME}_TMP})
+ 
+-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
++    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake"
++                  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
++            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+ 
+-# Add builds
+-# ==========
++    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.in"
++                   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" @ONLY)
+ 
+-include("${PROJECT_NAME}Config.cmake")
+-include(CTest)
++    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
++            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig/")
+ 
+-# Tests
++endif()
++
++# Build tests
++# ===========
+ 
+ if(BUILD_TESTS OR BUILD_ALL)
++
+     enable_testing()
+     add_subdirectory(test)
++
+ endif()
+ 
+-# Examples
++# Build examples
++# ==============
+ 
+ if(BUILD_EXAMPLES OR BUILD_ALL)
++
+     enable_testing()
+     add_subdirectory(examples)
++
+ endif()
+ 
+-# Python API
++# Build Python API
++# ================
+ 
+ if(BUILD_PYTHON OR BUILD_ALL)
++
++    # The C++ functions are build to a library with name "_${PROJECT_NAME}"
++    # The Python library simply loads all functions
++    set(PYPROJECT_NAME "_${PROJECT_NAME}")
++
+     if(NOT CMAKE_BUILD_TYPE)
+         set(CMAKE_BUILD_TYPE Release)
+     endif()
+-    find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
++
+     find_package(pybind11 REQUIRED CONFIG)
+     find_package(xtensor-python REQUIRED)
+-    pybind11_add_module(mypymod python/main.cpp)
+-    set_target_properties(mypymod PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+-    target_link_libraries(mypymod PUBLIC ${PROJECT_NAME} pybind11::module Python::NumPy xtensor-python)
+-    target_compile_definitions(mypymod PRIVATE VERSION_INFO=${PROJECT_VERSION})
++
++    if (SKBUILD)
++        find_package(NumPy REQUIRED)
++    else()
++        find_package(Python REQUIRED COMPONENTS Interpreter Development NumPy)
++    endif()
++
++    pybind11_add_module(${PYPROJECT_NAME} python/main.cpp)
++
++    target_compile_definitions(${PYPROJECT_NAME} PUBLIC VERSION_INFO=${PROJECT_VERSION})
++    target_link_libraries(${PYPROJECT_NAME} PUBLIC ${PROJECT_NAME} xtensor-python)
++
++    if (SKBUILD)
++        target_include_directories(${PYPROJECT_NAME} PUBLIC ${NumPy_INCLUDE_DIRS})
++    else()
++        target_link_libraries(${PYPROJECT_NAME} PUBLIC ${PROJECT_NAME} pybind11::module Python::NumPy)
++    endif()
++
+     if (USE_ASSERT)
+-        target_link_libraries(mypymod PUBLIC QPot::assert)
++        target_link_libraries(${PYPROJECT_NAME} PUBLIC QPot::assert)
+         message(STATUS "Compiling ${PROJECT_NAME}-Python with assertions")
+     endif()
++
+     if (USE_DEBUG)
+-        target_link_libraries(mypymod PUBLIC QPot::debug)
++        target_link_libraries(${PYPROJECT_NAME} PUBLIC QPot::debug)
+         message(STATUS "Compiling ${PROJECT_NAME}-Python in debug mode")
+     endif()
++
+     if (USE_SIMD)
+         find_package(xtensor REQUIRED)
+         find_package(xsimd REQUIRED)
+-        target_link_libraries(mypymod PUBLIC xtensor::optimize xtensor::use_xsimd)
++        target_link_libraries(${PYPROJECT_NAME} PUBLIC xtensor::optimize xtensor::use_xsimd)
+         message(STATUS "Compiling ${PROJECT_NAME}-Python with hardware optimization")
+     endif()
++
++    if (SKBUILD)
++        if(APPLE)
++            set_target_properties(${PYPROJECT_NAME} PROPERTIES INSTALL_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
++        else()
++            set_target_properties(${PYPROJECT_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
++        endif()
++        install(TARGETS ${PYPROJECT_NAME} DESTINATION .)
++    endif()
++
+ endif()
+ 
+-# Documentation
++# Build documentation
++# ===================
+ 
+ if(BUILD_DOCS OR BUILD_ALL)
++
+     find_package(Doxygen REQUIRED)
+ 
+     set(DOXYGEN_EXCLUDE_SYMBOLS detail)
+@@ -161,4 +215,5 @@ if(BUILD_DOCS OR BUILD_ALL)
+     set(DOXYGEN_STRIP_FROM_INC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
+     set(DOXYGEN_STRIP_FROM_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
+     doxygen_add_docs(docs "${CMAKE_CURRENT_SOURCE_DIR}/include" "README.md")
++
+ endif()
+diff --git a/README.md b/README.md
+index fa23b61..4c8e5f1 100644
+--- a/README.md
++++ b/README.md
+@@ -9,6 +9,53 @@ Library to keep track of a sequential potential energy landscape.
+ 
+ Documentation: https://tdegeus.github.io/QPot
+ 
++## Contents
++
++<!-- MarkdownTOC -->
++
++- [Overview](#overview)
++    - [Disclaimer](#disclaimer)
++    - [More information](#more-information)
++    - [Implementation](#implementation)
++        - [C++ and Python](#c-and-python)
++        - [Chunked.hpp](#chunkedhpp)
++        - [Static.hpp](#statichpp)
++        - [Redraw.hpp](#redrawhpp)
++    - [Installation](#installation)
++        - [C++ headers](#c-headers)
++            - [Using conda](#using-conda)
++            - [From source](#from-source)
++        - [Python module](#python-module)
++            - [Using conda](#using-conda-1)
++            - [From source](#from-source-1)
++    - [Compiling user-code](#compiling-user-code)
++        - [Using CMake](#using-cmake)
++            - [Example](#example)
++            - [Targets](#targets)
++            - [Optimisation](#optimisation)
++        - [By hand](#by-hand)
++        - [Using pkg-config](#using-pkg-config)
++    - [Change-log](#change-log)
++        - [v0.9.7](#v097)
++        - [v0.9.6](#v096)
++        - [v0.9.5](#v095)
++        - [v0.9.4](#v094)
++        - [v0.9.3](#v093)
++        - [v0.9.2](#v092)
++        - [v0.9.1](#v091)
++        - [v0.9.0](#v090)
++        - [v0.8.0](#v080)
++        - [v0.7.0](#v070)
++        - [v0.6.2](#v062)
++        - [v0.6.1](#v061)
++        - [v0.6.0](#v060)
++        - [v0.5.0](#v050)
++        - [v0.4.0](#v040)
++        - [v0.3.0](#v030)
++        - [v0.2.0](#v020)
++
++<!-- /MarkdownTOC -->
++
+ ## Overview
+ 
+ ### Disclaimer
+@@ -201,12 +248,15 @@ To enable them you have to compile on your system, as is discussed next.
+ git checkout https://github.com/tdegeus/QPot.git
+ cd QPot
+ 
+-# Only if you want to use hardware optimisation:
+-export CMAKE_ARGS="-DUSE_SIMD=1"
++# python setup.py build --build-type Release -DUSE_DEBUG=1 -vv
++python setup.py install --build-type Release -DUSE_SIMDD=1 -vv
++
++# # Only if you want to use hardware optimisation:
++# export CMAKE_ARGS="-DUSE_SIMD=1"
+ 
+-# Compile and install the Python module
+-# (-vv can be omitted as is controls just the verbosity)
+-python -m pip install . -vv
++# # Compile and install the Python module
++# # (-vv can be omitted as is controls just the verbosity)
++# python -m pip install . -vv
+ ```
+ 
+ ### Compiling user-code
+diff --git a/environment.yaml b/environment.yaml
+index d3338ac..54a0a0f 100644
+--- a/environment.yaml
++++ b/environment.yaml
+@@ -13,6 +13,7 @@ dependencies:
+   - pybind11
+   - python
+   - python-prrng
++  - scikit-build
+   - setuptools_scm
+   - xsimd
+   - xtensor
+diff --git a/python/QPot/__init__.py b/python/QPot/__init__.py
+new file mode 100644
+index 0000000..529408f
+--- /dev/null
++++ b/python/QPot/__init__.py
+@@ -0,0 +1 @@
++from ._QPot import *
+diff --git a/python/main.cpp b/python/main.cpp
+index c0dcf80..4722291 100644
+--- a/python/main.cpp
++++ b/python/main.cpp
+@@ -21,7 +21,7 @@ Python API.
+ 
+ namespace py = pybind11;
+ 
+-PYBIND11_MODULE(QPot, m)
++PYBIND11_MODULE(_QPot, m)
+ {
+     xt::import_numpy();
+ 
+diff --git a/setup.py b/setup.py
+index a46f388..4d78dbf 100644
+--- a/setup.py
++++ b/setup.py
+@@ -3,118 +3,15 @@ import re
+ import sys
+ import subprocess
+ 
+-from setuptools import setup, Extension
+-from setuptools.command.build_ext import build_ext
+-
++from skbuild import setup
+ from setuptools_scm import get_version
+ 
+-# ==================================================================
+-# Tools to build/install by controlling CMakeLists.txt from setup.py
+-# (c) Dean Moldovan
+-#     https://github.com/pybind/cmake_example/blob/master/setup.py
+-# ==================================================================
+-
+-# Convert distutils Windows platform specifiers to CMake -A arguments
+-PLAT_TO_CMAKE = {
+-    "win32": "Win32",
+-    "win-amd64": "x64",
+-    "win-arm32": "ARM",
+-    "win-arm64": "ARM64",
+-}
+-
+-# A CMakeExtension needs a sourcedir instead of a file list.
+-# The name must be the _single_ output extension from the CMake build.
+-# If you need multiple extensions, see scikit-build.
+-class CMakeExtension(Extension):
+-    def __init__(self, name, sourcedir=""):
+-        Extension.__init__(self, name, sources=[])
+-        self.sourcedir = os.path.abspath(sourcedir)
+-
+-
+-class CMakeBuild(build_ext):
+-    def build_extension(self, ext):
+-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+-
+-        # required for auto-detection of auxiliary "native" libs
+-        if not extdir.endswith(os.path.sep):
+-            extdir += os.path.sep
+-
+-        cfg = "Debug" if self.debug else "Release"
+-
+-        # CMake lets you override the generator - we need to check this.
+-        # Can be set with Conda-Build, for example.
+-        cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
+-
+-        # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
+-        cmake_args = [
+-            "-DBUILD_PYTHON=1",
+-            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={}".format(extdir),
+-            "-DPython_EXECUTABLE={}".format(sys.executable),
+-            "-DCMAKE_BUILD_TYPE={}".format(cfg),  # not used on MSVC, but no harm
+-        ]
+-        build_args = []
+-
+-        if self.compiler.compiler_type != "msvc":
+-            # Using Ninja-build since it a) is available as a wheel and b)
+-            # multithreads automatically. MSVC would require all variables be
+-            # exported for Ninja to pick it up, which is a little tricky to do.
+-            # Users can override the generator with CMAKE_GENERATOR in CMake
+-            # 3.15+.
+-            if not cmake_generator:
+-                cmake_args += ["-GNinja"]
+-
+-        else:
+-
+-            # Single config generators are handled "normally"
+-            single_config = any(x in cmake_generator for x in {"NMake", "Ninja"})
+-
+-            # CMake allows an arch-in-generator style for backward compatibility
+-            contains_arch = any(x in cmake_generator for x in {"ARM", "Win64"})
+-
+-            # Specify the arch if using MSVC generator, but only if it doesn't
+-            # contain a backward-compatibility arch spec already in the
+-            # generator name.
+-            if not single_config and not contains_arch:
+-                cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
+-
+-            # Multi-config generators have a different way to specify configs
+-            if not single_config:
+-                cmake_args += [
+-                    "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}".format(cfg.upper(), extdir)
+-                ]
+-                build_args += ["--config", cfg]
+-
+-        if sys.platform.startswith("darwin"):
+-            # Cross-compile support for macOS - respect ARCHFLAGS if set
+-            archs = re.findall(r"-arch (\S+)", os.environ.get("ARCHFLAGS", ""))
+-            if archs:
+-                cmake_args += ["-DCMAKE_OSX_ARCHITECTURES={}".format(";".join(archs))]
+-
+-        if "CMAKE_ARGS" in os.environ:
+-            cmake_args += os.environ["CMAKE_ARGS"].split(" ")
+-
+-        # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level
+-        # across all generators.
+-        if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
+-            # self.parallel is a Python 3 only way to set parallel jobs by hand
+-            # using -j in the build_ext call, not supported by pip or PyPA-build.
+-            if hasattr(self, "parallel") and self.parallel:
+-                # CMake 3.12+ only.
+-                build_args += ["-j{}".format(self.parallel)]
+-
+-        if not os.path.exists(self.build_temp):
+-            os.makedirs(self.build_temp)
+-
+-        subprocess.check_call(
+-            ["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp
+-        )
+-        subprocess.check_call(
+-            ["cmake", "--build", "."] + build_args, cwd=self.build_temp
+-        )
++# cmake_args = []
+ 
+-# ==================================================================
+-# Actual setup
+-# ==================================================================
++# if "CMAKE_ARGS" in os.environ:
++#     args = list(filter(None, os.environ["CMAKE_ARGS"].split(" ")))
++#     if len(args) > 0:
++#         cmake_args += [arg for arg in args if len(arg.split("DCMAKE_INSTALL_PREFIX")) == 1]
+ 
+ setup(
+     name = 'QPot',
+@@ -125,8 +22,9 @@ setup(
+     author = 'Tom de Geus',
+     author_email = 'tom@geus.me',
+     url = 'https://github.com/tdegeus/QPot',
+-    setup_requires = ['setuptools_scm'],
+-    ext_modules = [CMakeExtension("QPot")],
+-    cmdclass = {"build_ext": CMakeBuild},
+-    zip_safe = False,
++    packages = ['QPot'],
++    package_dir = {'': 'python'},
++    cmake_install_dir = 'python/QPot',
++    # cmake_args = cmake_args,
++    cmake_minimum_required_version = "3.13...3.21",
+ )
