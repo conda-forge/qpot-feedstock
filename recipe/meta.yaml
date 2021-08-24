@@ -72,6 +72,7 @@ outputs:
         - {{ name }}
       commands:
         - pip check
+        - python -c "import QPot; QPot.version()"
       requires:
         - pip
 
