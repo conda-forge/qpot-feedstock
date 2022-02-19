@@ -59,6 +59,7 @@ outputs:
         - numpy *
         - pip
         - pybind11
+        - pybind11-abi
         - python
         - scikit-build
         - setuptools_scm
