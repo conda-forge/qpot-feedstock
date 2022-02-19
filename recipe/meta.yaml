@@ -53,8 +53,8 @@ outputs:
         - setuptools_scm                      # [build_platform != target_platform]
         - {{ compiler('cxx') }}
         - cmake
-        - ninja
         - make  # [unix]
+        - ninja
       host:
         - numpy *
         - pip
@@ -65,15 +65,15 @@ outputs:
         - xtensor
         - xtensor-python
       run:
-        - python
         - numpy *
+        - python
 
     test:
       imports:
         - {{ name }}
       commands:
         - pip check
-        - python -c "import QPot; QPot.version()"
+        - python -c "import {{ name }}; assert {{ name }}.version() == '{{ version }}'"
       requires:
         - pip
 
