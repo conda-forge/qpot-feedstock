@@ -1,6 +1,6 @@
 {% set org = "tdegeus" %}
 {% set name = "QPot" %}
-{% set version = "0.9.10" %}
+{% set version = "0.10.0" %}
 
 package:
   name: {{ name|lower }}-split
@@ -8,12 +8,10 @@ package:
 
 source:
   url: https://github.com/{{ org }}/{{ name }}/archive/v{{ version }}.tar.gz
-  sha256: 93421ad4a780425fb4b16cf2e96bfddfdc19b0fee6a712c61854634b006a0183
+  sha256: 0c3315233913500f2282e599e28fd450efa5f01ff7cb02de09991ceecbe585d1
 
 build:
   number: 0
-  script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
-  skip: true  # [python_impl == 'pypy']
 
 outputs:
 
@@ -21,6 +19,9 @@ outputs:
 
     script: install.sh  # [unix]
     script: install.bat  # [win]
+
+    build:
+      script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
 
     requirements:
       build:
@@ -44,6 +45,10 @@ outputs:
 
     script: install_python.sh  # [unix]
     script: install_python.bat  # [win]
+
+    build:
+      script_env: SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
+      skip: true  # [python_impl == 'pypy']
 
     requirements:
       build:
