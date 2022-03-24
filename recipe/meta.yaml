@@ -1,6 +1,6 @@
 {% set org = "tdegeus" %}
 {% set name = "QPot" %}
-{% set version = "0.10.0" %}
+{% set version = "0.10.1" %}
 
 package:
   name: {{ name|lower }}-split
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://github.com/{{ org }}/{{ name }}/archive/v{{ version }}.tar.gz
-  sha256: 0c3315233913500f2282e599e28fd450efa5f01ff7cb02de09991ceecbe585d1
+  sha256: 88ea2f0588657ab0cd252fd3f4a494b7a1d61102328994f997acd979536e2b77
 
 build:
   number: 0
