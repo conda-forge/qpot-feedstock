@@ -7,13 +7,13 @@ Package license: MIT
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/qpot-feedstock/blob/main/LICENSE.txt)
 
-Summary: Library to keep track of a sequential potential energy landscape.
+Summary: Library to handle a range of increasing numbers.
 
 Development: https://github.com/tdegeus/QPot
 
 Documentation: https://tdegeus.github.io/QPot
 
-Library to keep track of a sequential potential energy landscape.
+Library to handle a range of increasing numbers.
 
 Current build status
 ====================
