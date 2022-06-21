@@ -1,6 +1,6 @@
 {% set org = "tdegeus" %}
 {% set name = "QPot" %}
-{% set version = "0.11.0" %}
+{% set version = "0.12.0" %}
 
 package:
   name: {{ name|lower }}-split
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://github.com/{{ org }}/{{ name }}/archive/v{{ version }}.tar.gz
-  sha256: ea0a729859ef078752e16f68e6f02ed70500e6e89aab8046afeabca91dd8c6c2
+  sha256: d0cfe9db393650710db516f31630b8a1f26c78705b0a37692cde660f253ec25f
 
 build:
   number: 1
@@ -35,10 +35,9 @@ outputs:
 
     test:
       commands:
-        - test -d ${PREFIX}/include/{{ name }}  # [unix]
-        - test -f ${PREFIX}/include/{{ name }}/Chunked.hpp  # [unix]
+        - test -d ${PREFIX}/include/{{ name }}.h  # [unix]
         - test -f ${PREFIX}/lib/cmake/{{ name }}/{{ name }}Config.cmake  # [unix]
-        - if exist %LIBRARY_PREFIX%\include\{{ name }}\Chunked.hpp (exit 0) else (exit 1)  # [win]
+        - if exist %LIBRARY_PREFIX%\include\{{ name }}.h (exit 0) else (exit 1)  # [win]
         - if exist %LIBRARY_PREFIX%\lib\cmake\{{ name }}Config.cmake (exit 0) else (exit 1)  # [win]
 
   - name: python-{{ name|lower }}
@@ -88,8 +87,8 @@ about:
   license: MIT
   license_family: MIT
   license_file: LICENSE
-  summary: Library to keep track of a sequential potential energy landscape.
-  description: Library to keep track of a sequential potential energy landscape.
+  summary: Library to handle a range of increasing numbers.
+  description: Library to handle a range of increasing numbers.
   doc_url: https://{{ org }}.github.io/{{ name }}
   dev_url: https://github.com/{{ org }}/{{ name }}
 
