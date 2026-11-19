@@ -1,27 +1,25 @@
-cdt_name:
-- cos6
+c_stdlib:
+- vs
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
 cxx_compiler:
-- gxx
+- vs
 cxx_compiler_version:
-- '10'
-docker_image:
-- quay.io/condaforge/linux-anvil-cos7-x86_64
+- '2022'
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 pybind11_abi:
-- '4'
+- '12'
 python:
-- 3.9.* *_73_pypy
+- 3.11.* *_cpython
+- 3.12.* *_cpython
+- 3.13.* *_cp313
+- 3.14.* *_cp314
 python_impl:
-- pypy
+- cpython
 target_platform:
-- linux-64
-zip_keys:
-- - python
-  - python_impl
+- win-64
